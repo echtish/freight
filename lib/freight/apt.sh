@@ -116,7 +116,7 @@ apt_cache() {
 	# the `Packages` file, too.
 	for COMP in $COMPS
 	do
-		for ARCH in $ARCHS
+		for ARCH in $APT_ARCHS
 		do
 			cat >"$DISTCACHE/$COMP/binary-$ARCH/Release" <<EOF
 Archive: $DIST
@@ -152,7 +152,7 @@ Label: $LABEL
 Suite: $DIST
 Codename: $DIST
 Components: $(echo "$COMPS" | tr \\n " ")
-Architectures: $ARCHS
+Architectures: $APT_ARCHS
 EOF
 
 		# Finish the top-level `Release` file with references and
@@ -224,7 +224,7 @@ apt_cache_binary() {
 
 	# Create all architecture-specific directories.  This will allow
 	# packages marked `all` to actually be placed in all architectures.
-	for ARCH in $ARCHS
+	for ARCH in $APT_ARCHS
 	do
 		mkdir -p "$DISTCACHE/$COMP/binary-$ARCH"
 		touch "$DISTCACHE/$COMP/binary-$ARCH/Packages"

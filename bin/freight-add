@@ -5,6 +5,7 @@
 #/ Usage: freight add [-c <conf>] [-v] [-h] <package> <manager>/<distro>...
 #/   -c <conf>, --conf=<conf> config file to parse
 #/   -v, --verbose            verbose mode
+#/   -d, --debug              debug mode
 #/   -h, --help               show this help message
 
 set -e
@@ -20,11 +21,14 @@ do
 		-c*) CONF="$(echo "$1" | cut -c"3-")" shift;;
 		--conf=*) CONF="$(echo "$1" | cut -c"8-")" shift;;
 		-v|--verbose) VERBOSE=1 shift;;
+		-d|--debug) VERBOSE=1 shift;;
 		-h|--help) usage 0;;
 		-*) echo "# [freight] unknown switch: $1" >&2;;
 		*) break;;
 	esac
 done
+
+[ $DEBUG -eq 1 ] && set -x
 
 . "$(dirname $(dirname $0))/lib/freight/conf.sh"
 
@@ -35,7 +39,7 @@ done
 while [ "$#" -gt 0 ]
 do
 	case "$1" in
-		*.deb|*.dsc|*.orig.tar.gz|*.diff.gz|*.debian.tar.gz)
+		*.deb|*.dsc|*.orig.tar.gz|*.diff.gz|*.debian.tar.gz|*.rpm)
 			PATHNAMES="$PATHNAMES $1" shift;;
 		*.build|*.changes) shift;;
 		*) break;;

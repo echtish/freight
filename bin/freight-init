@@ -11,6 +11,7 @@
 #/   --origin=<origin>        Debian archive Origin field (default "Freight")
 #/   --label=<label>          Debian archive Label field (default "Freight")
 #/   -v, --verbose            verbose mode
+#/   -d, --debug              debug mode
 #/   -h, --help               show this help message
 
 set -e
@@ -34,18 +35,24 @@ do
 		--libdir=*) VARLIB="$(echo "$1" | cut -c"10-")" shift;;
 		--cachedir) VARCACHE="$2" shift 2;;
 		--cachedir=*) VARCACHE="$(echo "$1" | cut -c"12-")" shift;;
-		--archs) ARCHS="$2" shift 2;;
-		--archs=*) ARCHS="$(echo "$1" | cut -c"9-")" shift;;
+		--apt-archs) APT_ARCHS="$2" shift 2;;
+		--apt-archs=*) APT_ARCHS="$(echo "$1" | cut -c"9-")" shift;;
+		--yum-archs) YUM_ARCHS="$2" shift 2;;
+		--yum-archs=*) YUM_ARCHS="$(echo "$1" | cut -c"9-")" shift;;
 		--origin) ORIGIN="$2" shift 2;;
 		--origin=*) ORIGIN="$(echo "$1" | cut -c"10-")" shift;;
 		--label) LABEL="$2" shift 2;;
 		--label=*) LABEL="$(echo "$1" | cut -c"9-")" shift;;
 		-v|--verbose) VERBOSE=1 shift;;
+		-d|--debug) DEBUG=1 shift;;
 		-h|--help) usage 0;;
 		-*) echo "# [freight] unknown switch: $1" >&2;;
 		*) break;;
 	esac
 done
+
+[ $DEBUG -eq 1 ] && set -x
+
 DIRNAME="$(cd "${1:-"."}" && pwd)"
 [ -z "$GPG" -o -z "$DIRNAME" ] && usage 1
 
@@ -66,7 +73,8 @@ VARLIB="$VARLIB"
 VARCACHE="$VARCACHE"
 GPG="$GPG"
 EOF
-[ "$ARCHS" ] && echo "ARCHS=\"$ARCHS\"" >>"$CONF"
+[ "$APT_ARCHS" ] && echo "APT_ARCHS=\"$APT_ARCHS\"" >>"$CONF"
+[ "$YUM_ARCHS" ] && echo "YUM_ARCHS=\"$YUM_ARCHS\"" >>"$CONF"
 [ "$ORIGIN" ] && echo "ORIGIN=\"$ORIGIN\"" >>"$CONF"
 [ "$LABEL" ] && echo "LABEL=\"$LABEL\"" >>"$CONF"
 

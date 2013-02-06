@@ -13,3 +13,7 @@ LABEL="Freight"
 # repository provider.  Use `gpg --gen-key` (see `gpg`(1) for more
 # details) to generate a key and put its email address here.
 GPG="example@example.com"
+
+# Default architectures.
+APT_ARCHS="i386 amd64"
+YUM_ARCHS="i386 x86_64"

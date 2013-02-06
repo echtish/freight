@@ -9,6 +9,7 @@
 #/   -g <email>, --gpg=<email> GPG key to use
 #/   -c <conf>, --conf=<conf>  config file to parse
 #/   -v, --verbose             verbose mode
+#/   -d, --debug               debug mode
 #/   -h, --help                show this help message
 
 set -e
@@ -28,11 +29,14 @@ do
 		-c*) CONF="$(echo "$1" | cut -c"3-")" shift;;
 		--conf=*) CONF="$(echo "$1" | cut -c"8-")" shift;;
 		-v|--verbose) VERBOSE=1 shift;;
+		-d|--debug) DEBUG=1 shift;;
 		-h|--help) usage 0;;
 		-*) echo "# [freight] unknown switch: $1" >&2;;
 		*) break;;
 	esac
 done
+
+[ $DEBUG -eq 1 ] && set -x
 
 . "$(dirname "$(dirname "$0")")/lib/freight/conf.sh"
 
@@ -63,7 +67,7 @@ do
 
 	# Parse the manager and distro out of the Freight library path.
 	DIR="$(readlink -f "$DIR")"
-	DIR="${DIR##"$VARLIB/"}"
+	DIR="${DIR##"$(readlink -f "$VARLIB")/"}"
 	MANAGER="$(dirname "$DIR")"
 	DIST="$(basename "$DIR")"
 
