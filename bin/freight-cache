@@ -36,7 +36,7 @@ do
 	esac
 done
 
-[ $DEBUG -eq 1 ] && set -x
+[ "$DEBUG" = "1" ] && set -x
 
 . "$(dirname "$(dirname "$0")")/lib/freight/conf.sh"
 

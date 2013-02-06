@@ -51,7 +51,7 @@ do
 	esac
 done
 
-[ $DEBUG -eq 1 ] && set -x
+[ "$DEBUG" = "1" ] && set -x
 
 DIRNAME="$(cd "${1:-"."}" && pwd)"
 [ -z "$GPG" -o -z "$DIRNAME" ] && usage 1
