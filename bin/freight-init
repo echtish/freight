@@ -46,7 +46,7 @@ do
 		-v|--verbose) VERBOSE=1 shift;;
 		-d|--debug) DEBUG=1 shift;;
 		-h|--help) usage 0;;
-		-*) echo "# [freight] unknown switch: $1" >&2;;
+		-*) echo "# [freight] unknown switch: $1" >&2; shift;;
 		*) break;;
 	esac
 done
