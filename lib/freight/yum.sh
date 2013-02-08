@@ -645,42 +645,30 @@ yum_cache() {
 
 			echo "${REPOMD_XML}" > "$DISTCACHE/$COMP/binary-$ARCH/repodata/repomd.xml"
 
-#			gpg -abs$([ "$TTY" ] || echo " --no-tty") --use-agent -u"$GPG" \
-#				--detach-sign --armor \
-#				"$DISTCACHE/$COMP/binary-$ARCH/repodata/repomd.xml" || {
-#				cat <<EOF
-## [freight] couldn't sign the repository, perhaps you need to run
-## [freight] gpg --gen-key and update the GPG setting in $CONF
-## [freight] (see freight(5) for more information)
-#EOF
-#				rm -rf "$DISTCACHE"
-#				exit 1
-#			}
+			gpg -abs$([ "$TTY" ] || echo " --no-tty") --use-agent -u"$GPG" \
+				--detach-sign --armor \
+				"$DISTCACHE/$COMP/binary-$ARCH/repodata/repomd.xml" || {
+				cat <<EOF
+# [freight] couldn't sign the repository, perhaps you need to run
+# [freight] gpg --gen-key and update the GPG setting in $CONF
+# [freight] (see freight(5) for more information)
+EOF
+				rm -rf "$DISTCACHE"
+				exit 1
+			}
 		done
 	done
 
-	# Create and sign the top-level `repmod.xml` file with `gpg`.
-#	gpg -abs$(tty -s || echo " --no-tty") --use-agent -u"$GPG" \
-#		--detach-sign --armor \
-#		"$DISTCACHE/repodata/repomd.xml" || {
-#		cat <<EOF
-## [freight] couldn't sign the repository, perhaps you need to run
-## [freight] gpg --gen-key and update the GPG setting in $CONF
-## [freight] (see freight(5) for more information)
-#EOF
-#		rm -rf "$DISTCACHE"
-#		exit 1
-#	}
-
+	#FIME: this is called for all managers, should only do it once
 	# Generate `pubkey.gpg` containing the plaintext public key and
 	# `keyring.gpg` containing a complete GPG keyring containing only
 	# the appropriate public key.
-#	mkdir -m700 -p "$TMP/gpg"
-#	gpg -q --export -a "$GPG" |
-#	tee "$VARCACHE/pubkey.gpg" |
-#	gpg -q --homedir "$TMP/gpg" --import
-#	chmod 644 "$TMP/gpg/pubring.gpg"
-#	mv "$TMP/gpg/pubring.gpg" "$VARCACHE/keyring.gpg"
+	mkdir -m700 -p "$TMP/gpg"
+	gpg -q --export -a "$GPG" |
+	tee "$VARCACHE/pubkey.gpg" |
+	gpg -q --homedir "$TMP/gpg" --import
+	chmod 644 "$TMP/gpg/pubring.gpg"
+	mv "$TMP/gpg/pubring.gpg" "$VARCACHE/keyring.gpg"
 
 	# Move the symbolic link for this distro to this build.
 	ln -s "$DIST-$DATE" "$DISTCACHE-"
