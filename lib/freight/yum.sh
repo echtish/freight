@@ -433,7 +433,7 @@ yum_package_metadata_xml() {
 		PREFIX="$(yum_binary_prefix "$INFO")"
 		SOURCE="$(yum_binary_sourcename "$INFO")"
 		FILENAME="${NAME}-${VERSION##*:}-${RELEASE}.${ARCH}.rpm"
-		HREF="pool/$DIST/$COMP/$PREFIX/$SOURCE/$FILENAME"
+		HREF="/pool/$DIST/$COMP/$PREFIX/$SOURCE/$FILENAME"
 		PKG_SIZE="$(yum_filesize "$FILE")"
 		INSTALLED_SIZE="$(yum_binary_pkg_size "$INFO")"
 		ARCHIVE_SIZE="$(yum_binary_archive_size "$INFO")"
