@@ -139,7 +139,7 @@ yum_binary_pkg_size() {
 # Extract RPM header byte range
 yum_binary_pkg_header_range() {
 	pkg=$1
-	[ -f "$1" ] || return
+	[ -f "$1" ] || return 1
 
 	# rpm2cpio.sh, available in rpm.git
 	leadsize=96
@@ -222,7 +222,7 @@ yum_dist_arch_has_packages() {
 	pkgl="$DISTCACHE/$1/binary-$2/repodata/freight-pkglist"
 	if [ ! -f "$pkgl" ]; then
 		echo "0"
-		return 0
+		return 1
 	fi
 	pkgl_count=$(wc -l "$pkgl" | cut -d' ' -f1)
 	if [ $pkgl_count -gt 0 ]; then
@@ -252,7 +252,6 @@ yum_entry_epoch() {
 	#FIXME: need to set properly, just 0 for now
 	v="$(yum_entry_version "$1")"
 	[ -n "$v" ] && echo '0'
-	return 0
 }
 yum_entry_release() {
 	echo "$1" | cut -d' ' -f3 -s | cut -d- -f2- -s
@@ -285,19 +284,18 @@ yum_rpm_entry_xml() {
 		unset IFS	
 	} | uniq)
 	[ -n "$lines" ] && echo "<rpm:$TAG>\n$lines\n</rpm:$TAG>"
-	return 0
 }
 
 # See yum.packages.YumAvailablePackage._return_primary_files and
 # yum.misc.re_primary_filename for details.
 yum_rpm_is_dir_primary() {
-	[ -n "$(echo "$1" | grep -o '^/etc/')" ] && return 0
-	[ -n "$(echo "$1" | grep -o 'bin/')" ] && return 0
+	[ -n "$(echo "$1" | grep -o '^/etc/')" ] && return
+	[ -n "$(echo "$1" | grep -o 'bin/')" ] && return
 	return 1
 }
 yum_rpm_is_file_primary() {
-	yum_rpm_is_dir_primary "$1" && return 0
-	[ "$1" = "/usr/lib/sendmail" ] && return 0
+	yum_rpm_is_dir_primary "$1" && return
+	[ "$1" = "/usr/lib/sendmail" ] && return
 	return 1
 }
 yum_filelist_name() {
@@ -338,7 +336,6 @@ yum_rpm_filelist_xml() {
 		unset IFS	
 	} | uniq)
 	[ -n "$lines" ] && echo "$lines"
-	return 0
 }
 yum_changelog_attrs() {
 	author="$(html_entities "$(echo "$1" | sed 's/^\*[[:space:]]*[0-9]*[[:space:]]*//')")"
@@ -402,7 +399,6 @@ yum_rpm_changelog_xml() {
 		unset IFS	
 	})
 	[ -n "$lines" ] && echo "$lines"
-	return 0
 }
 yum_package_metadata_xml() {
 	cat "$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist" 2> /dev/null |
@@ -692,15 +688,15 @@ yum_cache_binary() {
 
 	rpm --query --package --queryformat="${RPM_QUERY_FORMAT}" "$VARLIB/yum/$DIST/$PATHNAME" > "$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/info" 2> /dev/null || {
 		echo "# [freight] skipping invalid RPM package $PATHNAME" >&2
-		return
+		return 1
 	}
 	rpm --query --package --queryformat="[%{FILENAMES}\t%{FILECLASS}\n]" "$VARLIB/yum/$DIST/$PATHNAME" > "$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/filelist" 2> /dev/null || {
 		echo "# [freight] skipping invalid RPM package $PATHNAME" >&2
-		return
+		return 1
 	}
 	rpm --query --package --queryformat="[* %{CHANGELOGTIME} %{CHANGELOGNAME}\n%{CHANGELOGTEXT}\n++freight-changelog-delim++\n]" "$VARLIB/yum/$DIST/$PATHNAME" > "$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/changelog" 2> /dev/null || {
 		echo "# [freight] skipping invalid RPM package $PATHNAME" >&2
-		return
+		return 1
 	}
 	echo "$(yum_sha1 "$VARLIB/yum/$DIST/$PATHNAME" 2> /dev/null)" > "$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/pkgid"
 
@@ -751,7 +747,7 @@ yum_cache_binary() {
 
 # FIXME: add support for SRCRPMs
 yum_cache_source() {
-	return 0
+	return
 }
 ## Add a source package to the given dist and to the pool.  *.orig.tar.gz and
 ## *.diff.gz will be found based on PATHNAME and associated with the correct
