@@ -251,7 +251,7 @@ yum_entry_version() {
 yum_entry_epoch() {
 	#FIXME: need to set properly, just 0 for now
 	v="$(yum_entry_version "$1")"
-	[ -n "$v" ] && echo '0'
+	[ -n "$v" ] && echo '0' || :
 }
 yum_entry_release() {
 	echo "$1" | cut -d' ' -f3 -s | cut -d- -f2- -s
@@ -263,7 +263,7 @@ yum_rpm_entry_xml() {
 
 	lines=$(
 	{
-		IFS="$SEP"
+		IFS=$SEP
 		for e in $ENTRIES
 		do
 			e="$(echo "$e" | sed -e 's/^[[:space:]]*//;s/[[:space:]]*$//')"
@@ -283,7 +283,7 @@ yum_rpm_entry_xml() {
 		done 
 		unset IFS	
 	} | uniq)
-	[ -n "$lines" ] && echo "<rpm:$TAG>\n$lines\n</rpm:$TAG>"
+	[ -n "$lines" ] && echo "<rpm:$TAG>\n$lines\n</rpm:$TAG>" || :
 }
 
 # See yum.packages.YumAvailablePackage._return_primary_files and
@@ -412,7 +412,7 @@ yum_package_metadata_xml() {
 		INFO="$RPM_CACHE/info"
 		PKG_ID=$(cat "$RPM_CACHE/pkgid")
 		FILE_LIST=$(cat "$RPM_CACHE/filelist")
-		ARCH="$(yum_binary_arch "$INFO")"
+		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
 		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
@@ -428,7 +428,7 @@ yum_package_metadata_xml() {
 		PACKAGER="$(yum_binary_packager "$INFO")"
 		PREFIX="$(yum_binary_prefix "$INFO")"
 		SOURCE="$(yum_binary_sourcename "$INFO")"
-		FILENAME="${NAME}-${VERSION##*:}-${RELEASE}.${ARCH}.rpm"
+		FILENAME="${NAME}-${VERSION##*:}-${RELEASE}.${PKG_ARCH}.rpm"
 		HREF="/pool/$DIST/$COMP/$PREFIX/$SOURCE/$FILENAME"
 		PKG_SIZE="$(yum_filesize "$FILE")"
 		INSTALLED_SIZE="$(yum_binary_pkg_size "$INFO")"
@@ -443,7 +443,7 @@ yum_package_metadata_xml() {
 
 		echo "<package type=\"rpm\">"
 		echo "<name>$NAME</name>"
-		echo "<arch>$ARCH</arch>"
+		echo "<arch>$PKG_ARCH</arch>"
 		echo "<version epoch=\"0\" ver=\"$VERSION\" rel=\"$RELEASE\"/>" 
 		echo "<checksum type=\"sha\" pkgid=\"YES\">$PKG_ID</checksum>"
 		echo "<summary>$(html_entities "$SUMMARY")</summary>"
@@ -480,13 +480,13 @@ yum_package_otherdata_xml() {
 		INFO="$RPM_CACHE/info"
 		PKG_ID=$(cat "$RPM_CACHE/pkgid")
 		CHANGE_LIST=$(cat "$RPM_CACHE/changelog")
-		ARCH="$(yum_binary_arch "$INFO")"
+		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
 		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
 		CHANGELOG="$(yum_rpm_changelog_xml "$CHANGE_LIST")"
 
-		echo "<package id=\"$PKG_ID\" name=\"$NAME\" arch=\"$ARCH\">"
+		echo "<package id=\"$PKG_ID\" name=\"$NAME\" arch=\"$PKG_ARCH\">"
 		echo "<version epoch=\"0\" ver=\"$VERSION\" rel=\"$RELEASE\"/>" 
 		echo "$CHANGELOG"
 		echo "</package>"
@@ -505,14 +505,13 @@ yum_package_filelist_xml() {
 		INFO="$RPM_CACHE/info"
 		PKG_ID=$(cat "$RPM_CACHE/pkgid")
 		FILE_LIST=$(cat "$RPM_CACHE/filelist")
-		ARCH="$(yum_binary_arch "$INFO")"
+		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
 		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
-		CHANGELOG="$(yum_rpm_changelog_xml "$CHANGE_LIST")"
 		PKG_FILES="$(yum_rpm_filelist_xml "$FILE_LIST" "\t")"
 
-		echo "<package id=\"$PKG_ID\" name=\"$NAME\" arch=\"$ARCH\">"
+		echo "<package id=\"$PKG_ID\" name=\"$NAME\" arch=\"$PKG_ARCH\">"
 		echo "<version epoch=\"0\" ver=\"$VERSION\" rel=\"$RELEASE\"/>" 
 		echo "$PKG_FILES"
 		echo "</package>"
@@ -716,12 +715,12 @@ yum_cache_binary() {
 	# Package properties.  Remove the epoch from the version number
 	# in the package filename, as is customary.
 	INFO="$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/info"
-	ARCH="$(yum_binary_arch "$INFO")"
+	PKG_ARCH="$(yum_binary_arch "$INFO")"
 	NAME="$(yum_binary_name "$INFO")"
 	VERSION="$(yum_binary_version "$INFO")"
 	PREFIX="$(yum_binary_prefix "$INFO")"
 	SOURCE="$(yum_binary_sourcename "$INFO")"
-	FILENAME="${NAME}-${VERSION##*:}.${ARCH}.rpm"
+	FILENAME="${NAME}-${VERSION##*:}.${PKG_ARCH}.rpm"
 
 	 # Link this package into the pool.
 	 POOL="pool/$DIST/$COMP/$PREFIX/$SOURCE"
@@ -737,9 +736,12 @@ yum_cache_binary() {
 
 	# Build a list of the one-or-more `Packages` files to append with
 	# this package's info.
-	if [ "$ARCH" = "noarch" ]
-	then FILES="$(find "$DISTCACHE/$COMP" -type f -name "freight-pkglist")"
-	else FILES="$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist"
+	if [ "$PKG_ARCH" = "noarch" ]; then
+		FILES="$(find "$DISTCACHE/$COMP" -type f -name "freight-pkglist")"
+	elif [ "$PKG_ARCH" = "i686" ]; then
+		FILES="$DISTCACHE/$COMP/binary-i386/repodata/freight-pkglist"
+	else
+		FILES="$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist"
 	fi
 
 	echo "$FILENAME" | tee -a $FILES >/dev/null
