@@ -175,12 +175,7 @@ yum_source_name() {
 
 # Print the version portion of a source package's pathname.
 yum_source_version() {
-	basename "$1" ".rpm" | cut -d_ -f2
-}
-
-# Print the original version portion of a source package's pathname.
-yum_source_origversion() {
-	yum_source_version "$1" | cut -d- -f1
+	basename "$1" ".rpm" | cut -d- -f1
 }
 
 yum_source_release() {
@@ -414,7 +409,7 @@ yum_package_metadata_xml() {
 		FILE_LIST=$(cat "$RPM_CACHE/filelist")
 		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
-		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
+		VERSION="$(yum_source_version "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
 		SUMMARY="$(yum_binary_summary "$INFO")"
 		DESCRIPTION="$(yum_binary_description "$INFO")"
@@ -452,7 +447,7 @@ yum_package_metadata_xml() {
 		echo "<url>$URL</url>"
 		echo "<time file=\"$FILE_TIME\" build=\"$BUILD_TIME\"/>"
 		echo "<size package=\"$PKG_SIZE\" installed=\"$INSTALLED_SIZE\" archive=\"$ARCHIVE_SIZE\"/>"
-		echo "<location href=\"$HREF\"/>"
+		echo "<location xml:base=\"http://pkg.cloudflare.com/test\" href=\"$HREF\"/>"
 		echo "<format>"
 		echo "<rpm:license>$(html_entities "$LICENSE")</rpm:license>"
 		echo "<rpm:vendor>$(html_entities "$VENDOR")</rpm:vendor>"
@@ -482,7 +477,7 @@ yum_package_otherdata_xml() {
 		CHANGE_LIST=$(cat "$RPM_CACHE/changelog")
 		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
-		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
+		VERSION="$(yum_source_version "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
 		CHANGELOG="$(yum_rpm_changelog_xml "$CHANGE_LIST")"
 
@@ -507,7 +502,7 @@ yum_package_filelist_xml() {
 		FILE_LIST=$(cat "$RPM_CACHE/filelist")
 		PKG_ARCH="$(yum_binary_arch "$INFO")"
 		NAME="$(yum_binary_name "$INFO")"
-		VERSION="$(yum_source_origversion "$(yum_binary_version "$INFO")")"
+		VERSION="$(yum_source_version "$(yum_binary_version "$INFO")")"
 		RELEASE="$(yum_binary_release "$INFO")"
 		PKG_FILES="$(yum_rpm_filelist_xml "$FILE_LIST" "\t")"
 
@@ -763,7 +758,7 @@ yum_cache_source() {
 #
 #	NAME="$(yum_source_name "$PATHNAME")"
 #	VERSION="$(yum_source_version "$PATHNAME")"
-#	ORIG_VERSION="$(yum_source_origversion "$PATHNAME")"
+#	ORIG_VERSION="$(yum_source_version "$PATHNAME")"
 #	DIRNAME="$(dirname "$PATHNAME")"
 #	DSC_FILENAME="${NAME}_${VERSION%*:}.dsc"
 #	DEBTAR_FILENAME="${NAME}_${VERSION%*:}.debian.tar.gz"
