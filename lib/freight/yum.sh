@@ -447,7 +447,7 @@ yum_package_metadata_xml() {
 		echo "<url>$URL</url>"
 		echo "<time file=\"$FILE_TIME\" build=\"$BUILD_TIME\"/>"
 		echo "<size package=\"$PKG_SIZE\" installed=\"$INSTALLED_SIZE\" archive=\"$ARCHIVE_SIZE\"/>"
-		echo "<location xml:base=\"http://pkg.cloudflare.com/test\" href=\"$HREF\"/>"
+		echo "<location href=\"$HREF\"/>"
 		echo "<format>"
 		echo "<rpm:license>$(html_entities "$LICENSE")</rpm:license>"
 		echo "<rpm:vendor>$(html_entities "$VENDOR")</rpm:vendor>"
