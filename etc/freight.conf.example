@@ -17,3 +17,6 @@ GPG="example@example.com"
 # Default architectures.
 APT_ARCHS="i386 amd64"
 YUM_ARCHS="i386 x86_64"
+
+# Base URL to use in XML href tags
+SITE_URL='http://example.com'

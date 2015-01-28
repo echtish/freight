@@ -34,3 +34,6 @@ done
 # Normalize directory names.
 VARLIB=${VARLIB%%/}
 VARCACHE=${VARCACHE%%/}
+
+# Base URL to use in XML href tags
+SITE_URL=''

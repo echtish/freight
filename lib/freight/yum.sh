@@ -217,7 +217,7 @@ yum_dist_arch_has_packages() {
 	pkgl="$DISTCACHE/$1/binary-$2/repodata/freight-pkglist"
 	if [ ! -f "$pkgl" ]; then
 		echo "0"
-		return 1
+		return 0
 	fi
 	pkgl_count=$(wc -l "$pkgl" | cut -d' ' -f1)
 	if [ $pkgl_count -gt 0 ]; then
@@ -447,7 +447,11 @@ yum_package_metadata_xml() {
 		echo "<url>$URL</url>"
 		echo "<time file=\"$FILE_TIME\" build=\"$BUILD_TIME\"/>"
 		echo "<size package=\"$PKG_SIZE\" installed=\"$INSTALLED_SIZE\" archive=\"$ARCHIVE_SIZE\"/>"
-		echo "<location href=\"$HREF\"/>"
+		if [ -n "$SITE_URL" ]; then
+			echo "<location xml:base=\"$SITE_URL\" href=\"$HREF\"/>"
+		else
+			echo "<location href=\"$HREF\"/>"
+		fi
 		echo "<format>"
 		echo "<rpm:license>$(html_entities "$LICENSE")</rpm:license>"
 		echo "<rpm:vendor>$(html_entities "$VENDOR")</rpm:vendor>"
