@@ -13,6 +13,9 @@ YUM_ARCHS="i386 x86_64"
 ORIGIN="Freight"
 LABEL="Freight"
 
+# Base URL to use in XML href tags
+SITE_URL=''
+
 # Source all existing configuration files from lowest- to highest-priority.
 PREFIX="$(dirname $(dirname $0))"
 if [ "$PREFIX" = "/usr" ]
@@ -34,6 +37,3 @@ done
 # Normalize directory names.
 VARLIB=${VARLIB%%/}
 VARCACHE=${VARCACHE%%/}
-
-# Base URL to use in XML href tags
-SITE_URL=''
