@@ -294,7 +294,7 @@ yum_rpm_is_file_primary() {
 	return 1
 }
 yum_filelist_name() {
-	echo "$1" | cut -f1 -s
+	echo "$1" | cut -f1
 }
 yum_filelist_type() {
 	type="$(echo "$1" | cut -f2- -s)"
@@ -330,7 +330,7 @@ yum_rpm_filelist_xml() {
 		done 
 		unset IFS	
 	} | uniq)
-	[ -n "$lines" ] && echo "$lines"
+	echo "$lines"
 }
 yum_changelog_attrs() {
 	author="$(html_entities "$(echo "$1" | sed 's/^\*[[:space:]]*[0-9]*[[:space:]]*//')")"
@@ -393,7 +393,7 @@ yum_rpm_changelog_xml() {
 		done 
 		unset IFS	
 	})
-	[ -n "$lines" ] && echo "$lines"
+	echo "$lines"
 }
 yum_package_metadata_xml() {
 	cat "$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist" 2> /dev/null |
