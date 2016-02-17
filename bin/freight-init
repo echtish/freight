@@ -10,6 +10,7 @@
 #/   --archs=<archs>          architectures to support (default "i386 amd64")
 #/   --origin=<origin>        Debian archive Origin field (default "Freight")
 #/   --label=<label>          Debian archive Label field (default "Freight")
+#/   --suite=<suite>          Debian archive Suite field
 #/   -v, --verbose            verbose mode
 #/   -d, --debug              debug mode
 #/   -h, --help               show this help message
@@ -43,6 +44,8 @@ do
 		--origin=*) ORIGIN="$(echo "$1" | cut -c"10-")" shift;;
 		--label) LABEL="$2" shift 2;;
 		--label=*) LABEL="$(echo "$1" | cut -c"9-")" shift;;
+		--suite) SUITE="$2" shift 2;;
+		--suite=*) SUITE="$(echo "$1" | cut -c"9-")" shift;;
 		-v|--verbose) VERBOSE=1 shift;;
 		-d|--debug) DEBUG=1 shift;;
 		-h|--help) usage 0;;
@@ -77,6 +80,7 @@ EOF
 [ "$YUM_ARCHS" ] && echo "YUM_ARCHS=\"$YUM_ARCHS\"" >>"$CONF"
 [ "$ORIGIN" ] && echo "ORIGIN=\"$ORIGIN\"" >>"$CONF"
 [ "$LABEL" ] && echo "LABEL=\"$LABEL\"" >>"$CONF"
+[ "$SUITE" ] && echo "SUITE=\"$SUITE\"" >>"$CONF"
 
 # return 0 when we come here
 exit 0

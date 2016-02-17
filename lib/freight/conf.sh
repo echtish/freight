@@ -16,6 +16,14 @@ LABEL="Freight"
 # Base URL to use in XML href tags
 SITE_URL=''
 
+# Cache the control files after each run (on), or regenerate them every
+# time (off).
+CACHE="off"
+
+# Whether to follow symbolic links in `$VARLIB` to produce extra components
+# in the cache directory (on) or not (off).
+SYMLINKS="off"
+
 # Source all existing configuration files from lowest- to highest-priority.
 PREFIX="$(dirname $(dirname $0))"
 if [ "$PREFIX" = "/usr" ]
@@ -32,7 +40,15 @@ do
 	DIRNAME="$(dirname "$DIRNAME")"
 done
 [ "$FREIGHT_CONF" -a -f "$FREIGHT_CONF" ] && . "$FREIGHT_CONF"
-[ "$CONF" -a -f "$CONF" ] && . "$CONF"
+if [ "$CONF" ]
+then
+    if [ -f "$CONF" ]
+    then . "$CONF"
+    else
+        echo "# [freight] $CONF does not exist" >&2
+        exit 1
+    fi
+fi
 
 # Normalize directory names.
 VARLIB=${VARLIB%%/}

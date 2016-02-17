@@ -1,4 +1,4 @@
-VERSION=0.3.2
+VERSION=0.3.5
 BUILD=1
 
 prefix=/usr/local
@@ -16,21 +16,17 @@ clean:
 install: install-bin install-lib install-man install-sysconf
 
 install-bin:
-	install -d $(DESTDIR)$(bindir)
-	find bin -type f -printf %P\\0 | xargs -0r -I__ install bin/__ $(DESTDIR)$(bindir)/__
+	find bin -type f -printf %P\\0 | xargs -0r -I__ install -D bin/__ $(DESTDIR)$(bindir)/__
 
 install-lib:
-	find lib -type d -printf %P\\0 | xargs -0r -I__ install -d $(DESTDIR)$(libdir)/__
-	find lib -type f -printf %P\\0 | xargs -0r -I__ install -m644 lib/__ $(DESTDIR)$(libdir)/__
+	find lib -type f -printf %P\\0 | xargs -0r -I__ install -m644 -D lib/__ $(DESTDIR)$(libdir)/__
 
 install-man:
-	find man -type d -printf %P\\0 | xargs -0r -I__ install -d $(DESTDIR)$(mandir)/__
-	find man -type f -name \*.[12345678] -printf %P\\0 | xargs -0r -I__ install -m644 man/__ $(DESTDIR)$(mandir)/__
+	find man -type f -name \*.[12345678] -printf %P\\0 | xargs -0r -I__ install -m644 -D man/__ $(DESTDIR)$(mandir)/__
 	find man -type f -name \*.[12345678] -printf %P\\0 | xargs -0r -I__ gzip $(DESTDIR)$(mandir)/__
 
 install-sysconf:
-	find etc -type d -printf %P\\0 | xargs -0r -I__ install -d $(DESTDIR)$(sysconfdir)/__
-	find etc -type f -not -name freight.conf -printf %P\\0 | xargs -0r -I__ install -m644 etc/__ $(DESTDIR)$(sysconfdir)/__
+	find etc -type f -not -name freight.conf -printf %P\\0 | xargs -0r -I__ install -m644 -D etc/__ $(DESTDIR)$(sysconfdir)/__
 
 uninstall: uninstall-bin uninstall-lib uninstall-man uninstall-sysconf
 
@@ -65,8 +61,8 @@ build:
 	make uninstall prefix=/usr sysconfdir=/etc DESTDIR=debian
 
 deploy:
-	scp freight_$(VERSION)-$(BUILD)_all.deb freight@packages.rcrowley.org:
-	ssh -t freight@packages.rcrowley.org "freight add freight_$(VERSION)-$(BUILD)_all.deb apt/lenny apt/squeeze apt/lucid apt/maverick apt/natty apt/oneiric apt/precise && rm freight_$(VERSION)-$(BUILD)_all.deb && freight cache apt/lenny apt/squeeze apt/lucid apt/maverick apt/natty apt/oneiric apt/precise"
+	scp freight_$(VERSION)-$(BUILD)_all.deb root@rcrowley.org:
+	ssh -t root@rcrowley.org "freight add freight_$(VERSION)-$(BUILD)_all.deb apt/squeeze apt/wheezy apt/sid apt/lucid apt/precise apt/quantal apt/raring apt/saucy apt/trusty && rm freight_$(VERSION)-$(BUILD)_all.deb && freight cache apt/squeeze apt/wheezy apt/sid apt/lucid apt/precise apt/quantal apt/raring apt/saucy apt/trusty"
 
 man:
 	find man -name \*.ronn | xargs -n1 ronn --manual=Freight --style=toc
