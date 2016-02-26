@@ -698,11 +698,13 @@ yum_cache_binary() {
 	}
 	echo "$(yum_sha1 "$VARLIB/yum/$DIST/$PATHNAME" 2> /dev/null)" > "$TMP/.rpm-info-cache/$DIST/$COMP/$PACKAGE/pkgid"
 
-	# Create all architecture-specific directories.  This will allow
+	# Create all architecture-specific directories and pkglists. This will allow
 	# packages marked `all` to actually be placed in all architectures.
 	for ARCH in $YUM_ARCHS
 	do
 		mkdir -p "$DISTCACHE/$COMP/binary-$ARCH/repodata"
+		[ -f "$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist" ] ||
+			:> "$DISTCACHE/$COMP/binary-$ARCH/repodata/freight-pkglist"
 	done
 
 
