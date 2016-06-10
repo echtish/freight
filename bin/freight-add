@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env sh
 
 # Add a package to the Freight library.
 
@@ -16,21 +16,20 @@ usage() {
 }
 while [ "$#" -gt 0 ]
 do
-	case "$1" in
-		-c|--conf) CONF="$2" shift 2;;
-		-c*) CONF="$(echo "$1" | cut -c"3-")" shift;;
-		--conf=*) CONF="$(echo "$1" | cut -c"8-")" shift;;
-		-v|--verbose) VERBOSE=1 shift;;
-		-d|--debug) DEBUG=1 shift;;
-		-h|--help) usage 0;;
-		-*) echo "# [freight] unknown switch: $1" >&2; shift;;
-		*) break;;
-	esac
+    case "$1" in
+        -c|--conf) CONF="$2" shift 2;;
+        -c*) CONF="$(echo "$1" | cut -c"3-")" shift;;
+        --conf=*) CONF="$(echo "$1" | cut -c"8-")" shift;;
+        -v|--verbose) VERBOSE=1 shift;;
+        -h|--help) usage 0;;
+        -*) echo "# [freight] unknown switch: $1" >&2;;
+        *) break;;
+    esac
 done
 
 [ "$DEBUG" = "1" ] && set -x
 
-. "$(dirname $(dirname $0))/lib/freight/conf.sh"
+. "$(dirname "$(dirname "$0")")/lib/freight/conf.sh"
 
 # The non-option argument(s) following the last option are package files.
 # Binary packages have only one but source packages require two or three.
@@ -38,12 +37,13 @@ done
 # to be `<manager>/<distro>` pairs for this (source) package.
 while [ "$#" -gt 0 ]
 do
-	case "$1" in
-		*.deb|*.dsc|*.orig.tar.gz|*.diff.gz|*.debian.tar.gz|*.tar.gz|*.rpm)
-			PATHNAMES="$PATHNAMES $1" shift;;
-		*.build|*.changes) shift;;
-		*) break;;
-	esac
+    case "$1" in
+        *.deb|*.dsc|*.orig.tar.gz|*.orig.tar.bz2|*.orig.tar.xz|*.orig.tar.lzma|*.diff.gz|*.debian.tar.gz|*.debian.tar.bz2|*.debian.tar.xz|*.debian.tar.lzma|*.tar.gz|*.tar.bz2|*.tar.xz|*.tar.lzma|*.rpm)
+            # shellcheck disable=SC2153
+            PATHNAMES="$PATHNAMES $1" shift;;
+        *.build|*.changes) shift;;
+        *) break;;
+    esac
 done
 [ -z "$PATHNAMES" ] && usage 1
 [ -z "$*" ] && usage 1
@@ -53,10 +53,11 @@ done
 # later Freight commands will rely on the link count being reduced to one.
 mkdir -p "$VARLIB"
 TMP="$(mktemp -d "$VARLIB/freight.$$.XXXXXXXXXX")"
+# shellcheck disable=SC2064
 trap "rm -rf \"$TMP\"" EXIT INT TERM
 for PATHNAME in $PATHNAMES
 do
-	cp "$PATHNAME" "$TMP/"
+    cp "$PATHNAME" "$TMP/"
 done
 
 # Enter the Freight library directory so that items in `$@` may be given as
@@ -83,10 +84,10 @@ add() {
 # files in the Freight cache.
 for PATHNAME in $PATHNAMES
 do
-	FILENAME="$(basename "$PATHNAME")"
-	for DIRNAME in "$@"
-	do
-		mkdir -p "$DIRNAME"
+    FILENAME="$(basename "$PATHNAME")"
+    for DIRNAME in "$@"
+    do
+        mkdir -p "$DIRNAME"
         case "$FILENAME" in
             *_*_*.deb) add "$FILENAME" "$DIRNAME" "$PATHNAME";;
             *.deb)
@@ -102,5 +103,7 @@ do
                 add "$FILENAME" "$DIRNAME" "$PATHNAME" "$DEBNAME";;
             *) add "$FILENAME" "$DIRNAME" "$PATHNAME";;
         esac
-	done
+    done
 done
+
+# vim: et:ts=4:sw=4
